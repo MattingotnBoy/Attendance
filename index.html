@@ -69,6 +69,7 @@
         <span><i class="dot absent"></i> Absent</span>
         <span><i class="dot cancelled"></i> Cancelled</span>
       </div>
+      <div class="day-panel" id="dayPanel" hidden></div>
     </section>
 
     <!-- ===================== TIMETABLE ===================== -->
@@ -135,21 +136,6 @@
     <button class="tab" data-view="subj"><span class="ti">✦</span><span>Subjects</span></button>
     <button class="tab" data-view="calc"><span class="ti">=</span><span>Calc</span></button>
   </nav>
-
-  <!-- ===================== DAY SHEET ===================== -->
-  <div class="sheet-backdrop" id="sheetBackdrop" hidden>
-    <div class="sheet" id="daySheet" role="dialog" aria-modal="true">
-      <div class="sheet-head">
-        <h3 id="sheetDate">Day</h3>
-        <button class="sq-btn" id="sheetClose" aria-label="Close">✕</button>
-      </div>
-      <div id="sheetClasses" class="sheet-classes"></div>
-      <div class="sheet-add">
-        <select id="sheetAddSelect"></select>
-        <button class="chip-btn" id="sheetAddBtn">+ Add</button>
-      </div>
-    </div>
-  </div>
 
   <script src="app.js"></script>
 </body>

@@ -76,7 +76,7 @@
     $$(".view").forEach((v) => v.classList.toggle("is-active", v.id === "view-" + name));
     $$(".tab").forEach((t) => t.classList.toggle("is-active", t.dataset.view === name));
     if (name === "dash") renderDash();
-    if (name === "cal") renderCalendar();
+    if (name === "cal") { openDateKey = null; const dp = $("#dayPanel"); if (dp) dp.hidden = true; renderCalendar(); }
     if (name === "tt") renderTimetable();
     if (name === "subj") renderSubjects();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -147,15 +147,14 @@
   }
 
   /* ============================ Calendar ============================ */
-  $("#calPrev").addEventListener("click", () => { calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() - 1, 1); renderCalendar(); });
-  $("#calNext").addEventListener("click", () => { calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() + 1, 1); renderCalendar(); });
+  $("#calPrev").addEventListener("click", () => { closeDay(); calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() - 1, 1); renderCalendar(); });
+  $("#calNext").addEventListener("click", () => { closeDay(); calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() + 1, 1); renderCalendar(); });
 
   function renderCalendar() {
     $("#calTitle").textContent = MONTHS[calCursor.getMonth()] + " " + calCursor.getFullYear();
     const grid = $("#calGrid");
     grid.innerHTML = "";
-    const first = startOfMonth(calCursor);
-    const startDow = first.getDay();
+    const startDow = startOfMonth(calCursor).getDay();
     const daysInMonth = new Date(calCursor.getFullYear(), calCursor.getMonth() + 1, 0).getDate();
     const todayKey = dateKey(new Date());
 
@@ -166,6 +165,7 @@
       const k = dateKey(d);
       const cell = el("div", "cell");
       if (k === todayKey) cell.classList.add("today");
+      if (k === openDateKey) cell.classList.add("selected");
       cell.appendChild(el("span", "d", String(day)));
 
       const dots = el("div", "cell-dots");
@@ -178,43 +178,57 @@
         scheduled.slice(0, 4).forEach(() => dots.appendChild(el("i", "dot scheduled")));
       }
       cell.appendChild(dots);
-      cell.addEventListener("click", () => openDay(k));
+      cell.addEventListener("click", () => { openDateKey === k ? closeDay() : selectDay(k); });
       grid.appendChild(cell);
     }
   }
 
-  /* ============================ Day sheet ============================ */
-  const backdrop = $("#sheetBackdrop");
-  function openDay(k) { openDateKey = k; renderSheet(); backdrop.hidden = false; }
-  function closeSheet() { backdrop.hidden = true; openDateKey = null; renderCalendar(); renderDash(); }
-  $("#sheetClose").addEventListener("click", closeSheet);
-  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeSheet(); });
+  /* ============================ Inline day panel ============================ */
+  function selectDay(k) { openDateKey = k; renderCalendar(); renderDayPanel(); }
+  function closeDay() {
+    openDateKey = null;
+    const panel = $("#dayPanel");
+    if (panel) panel.hidden = true;
+    renderCalendar();
+    renderDash();
+  }
 
-  function renderSheet() {
+  function renderDayPanel() {
+    const panel = $("#dayPanel");
     const d = keyToDate(openDateKey);
-    $("#sheetDate").textContent = DAYS_SHORT[d.getDay()] + ", " + d.getDate() + " " + MONTHS[d.getMonth()];
-    const wrap = $("#sheetClasses");
-    wrap.innerHTML = "";
+    panel.innerHTML = "";
+    panel.hidden = false;
 
+    const head = el("div", "day-panel-head");
+    head.appendChild(el("h3", null, DAYS_SHORT[d.getDay()] + ", " + d.getDate() + " " + MONTHS[d.getMonth()]));
+    const close = el("button", "sq-btn", "✕");
+    close.addEventListener("click", closeDay);
+    head.appendChild(close);
+    panel.appendChild(head);
+
+    const list = el("div", "day-classes");
     const rec = state.records[openDateKey] || {};
-    // subjects to show: union of scheduled (timetable) + already-recorded
     const scheduled = state.timetable[d.getDay()] || [];
     const ids = Array.from(new Set([...scheduled, ...Object.keys(rec)])).filter(subjectById);
-
     if (!ids.length) {
-      wrap.appendChild(el("div", "sheet-empty", state.subjects.length ? "No classes scheduled. Add one below." : "Add subjects first (Subjects tab)."));
+      list.appendChild(el("div", "sheet-empty", state.subjects.length ? "No classes scheduled — add one below." : "Add subjects first (Subjects tab)."));
     }
-    ids.forEach((id) => wrap.appendChild(classRow(id, rec[id])));
+    ids.forEach((id) => list.appendChild(classRow(id, rec[id])));
+    panel.appendChild(list);
 
-    // add-select for extra classes not yet shown
-    const sel = $("#sheetAddSelect");
-    sel.innerHTML = "";
+    // add-row for extra classes
     const remaining = state.subjects.filter((s) => !ids.includes(s.id));
+    const add = el("div", "day-add");
+    const sel = el("select");
     if (!remaining.length) { sel.innerHTML = '<option value="">All subjects added</option>'; sel.disabled = true; }
-    else {
-      sel.disabled = false;
-      remaining.forEach((s) => { const o = el("option"); o.value = s.id; o.textContent = s.name; sel.appendChild(o); });
-    }
+    else remaining.forEach((s) => { const o = el("option"); o.value = s.id; o.textContent = s.name; sel.appendChild(o); });
+    add.appendChild(sel);
+    const addBtn = el("button", "chip-btn", "+ Add");
+    addBtn.addEventListener("click", () => { if (sel.value) setRecord(sel.value, "present"); });
+    add.appendChild(addBtn);
+    panel.appendChild(add);
+
+    if (panel.scrollIntoView) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   function classRow(id, current) {
@@ -240,15 +254,9 @@
     else state.records[openDateKey][id] = val;
     if (!Object.keys(state.records[openDateKey]).length) delete state.records[openDateKey];
     save();
-    renderSheet();
+    renderCalendar();   // refresh dots, keep selection highlight
+    renderDayPanel();   // refresh the panel in place
   }
-
-  $("#sheetAddBtn").addEventListener("click", () => {
-    const sel = $("#sheetAddSelect");
-    const id = sel.value;
-    if (!id) return;
-    setRecord(id, "present");
-  });
 
   /* ============================ Timetable ============================ */
   function renderTimetable() {
