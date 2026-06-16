@@ -17,9 +17,20 @@
   --sh-sm: 3px 3px 0 var(--ink);
   --r: 14px;
   --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+/* keep taps instant and stop iOS auto-restyling controls */
+button, .tab, .cell, .preset, .seg-btn, a { touch-action: manipulation; }
+button, input, select, textarea { -webkit-appearance: none; appearance: none; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 html, body {
   margin: 0;
@@ -31,10 +42,18 @@ html, body {
   overscroll-behavior-y: none;
   background-image: radial-gradient(rgba(17,17,17,0.05) 1.2px, transparent 1.2px);
   background-size: 22px 22px;
+  background-attachment: fixed;
+  min-height: 100svh;
 }
 h1, h2, h3 { font-family: "Space Grotesk", sans-serif; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 
-.app { max-width: 480px; margin: 0 auto; padding: 22px 16px calc(116px + var(--safe-b)); }
+.app {
+  max-width: 480px; margin: 0 auto;
+  padding-top: calc(22px + var(--safe-t));
+  padding-bottom: calc(116px + var(--safe-b));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
 
 /* Topbar */
 .topbar { margin-bottom: 20px; }
@@ -173,12 +192,16 @@ h1, h2, h3 { font-family: "Space Grotesk", sans-serif; font-weight: 700; letter-
 /* shared inputs */
 select, input[type="text"], input[type="number"] {
   background: #fff; color: var(--ink); border: var(--bw) solid var(--ink); border-radius: 10px;
-  padding: 11px 13px; font-size: 15px; font-family: "DM Sans", sans-serif; font-weight: 600; width: 100%;
-  -moz-appearance: textfield;
+  padding: 11px 13px; font-size: 16px; font-family: "DM Sans", sans-serif; font-weight: 600; width: 100%;
+  -moz-appearance: textfield; max-width: 100%;
 }
 input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 select:focus, input:focus { outline: none; box-shadow: var(--sh-sm); }
-select { cursor: pointer; }
+select {
+  cursor: pointer; padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 14px;
+}
 
 /* ===== Subjects ===== */
 .subj-form { padding: 16px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 12px; }
@@ -224,13 +247,14 @@ select { cursor: pointer; }
 /* ===== Tabbar ===== */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; justify-content: space-around;
-  padding: 9px 6px calc(9px + var(--safe-b)); background: var(--card);
-  border-top: var(--bw) solid var(--ink);
+  gap: 2px; background: var(--card); border-top: var(--bw) solid var(--ink);
+  padding-top: 9px; padding-bottom: calc(9px + var(--safe-b));
+  padding-left: max(6px, env(safe-area-inset-left)); padding-right: max(6px, env(safe-area-inset-right));
 }
 .tab {
-  flex: 1; background: none; border: none; cursor: pointer; color: var(--muted);
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  font-family: "Space Grotesk"; font-size: 10px; font-weight: 700; padding: 4px 0; max-width: 80px;
+  flex: 1; min-width: 0; background: none; border: none; cursor: pointer; color: var(--muted);
+  display: flex; flex-direction: column; align-items: center; gap: 3px; white-space: nowrap;
+  font-family: "Space Grotesk"; font-size: 10px; font-weight: 700; padding: 5px 2px; max-width: 84px;
   border-radius: 10px; transition: background 0.12s, color 0.12s;
 }
 .tab .ti { font-size: 18px; line-height: 1; }
