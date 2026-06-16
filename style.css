@@ -112,6 +112,21 @@ h1, h2, h3 { font-family: "Space Grotesk", sans-serif; font-weight: 700; letter-
 }
 .sq-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--ink); }
 
+/* ===== Info block ===== */
+.info-block {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--yellow); border: var(--bw) solid var(--ink); border-radius: var(--r);
+  box-shadow: var(--sh); padding: 14px 15px; margin-bottom: 16px;
+}
+.info-ic {
+  flex: 0 0 auto; width: 24px; height: 24px; border-radius: 999px;
+  background: var(--ink); color: var(--yellow); display: grid; place-items: center;
+  font-family: "Space Grotesk"; font-weight: 700; font-size: 14px; font-style: italic;
+}
+.info-text b { font-family: "Space Grotesk"; font-size: 14px; }
+.info-text ul { margin: 6px 0 0; padding-left: 18px; }
+.info-text li { font-size: 13px; font-weight: 500; line-height: 1.5; }
+
 /* ===== Overall ring ===== */
 .overall { display: flex; align-items: center; gap: 18px; padding: 20px; }
 .ring-wrap { position: relative; width: 116px; height: 116px; flex: 0 0 auto; }

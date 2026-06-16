@@ -87,6 +87,7 @@
 
   /* ============================ Dashboard ============================ */
   const RING_C = 2 * Math.PI * 50; // 314.16
+  const OVERALL_REQ = 85; // end-sem overall minimum
 
   function renderDash() {
     const cards = $("#subjectCards");
@@ -101,9 +102,8 @@
       cards.appendChild(subjectCard(subj, s));
     });
 
-    // overall — weighted by classes, required = max of subject requireds (or 75)
-    const req = state.subjects.length ? Math.max(...state.subjects.map((s) => s.required)) : 75;
-    const ov = computeStats(totA, totH, req);
+    // overall end-sem requirement is a fixed 85% (per Christ University rules)
+    const ov = computeStats(totA, totH, OVERALL_REQ);
     $("#overallAttended").textContent = totA;
     $("#overallHeld").textContent = totH;
     $("#overallPct").textContent = totH ? ov.pct.toFixed(1) + "%" : "—";
