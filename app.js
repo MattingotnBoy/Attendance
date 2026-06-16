@@ -86,7 +86,7 @@
   $("#emptyAddSubject").addEventListener("click", () => showView("subj"));
 
   /* ============================ Dashboard ============================ */
-  const RING_C = 2 * Math.PI * 52; // 326.7
+  const RING_C = 2 * Math.PI * 50; // 314.16
 
   function renderDash() {
     const cards = $("#subjectCards");
@@ -132,6 +132,7 @@
     else { pill = '<span class="pill bad">below</span>'; verdict = "Attend <b>" + s.mustAttend + "</b> in a row to recover."; }
 
     card.innerHTML =
+      '<div class="scard-tag"></div>' +
       '<div class="scard-top"><span class="scard-name">' + esc(subj.name) + '</span>' +
       '<span class="scard-pct">' + (s.held ? s.pct.toFixed(1) + "%" : "—") + '</span></div>' +
       '<div class="scard-sub">' + s.attended + " / " + s.held + " attended · needs " + subj.required + "%</div>" +
@@ -333,6 +334,89 @@
     save();
     renderSubjects();
   }
+
+  /* ============================ Calculator ============================ */
+  $$(".preset").forEach((b) => b.addEventListener("click", () => {
+    $("#cTarget").value = b.dataset.t;
+    $$(".preset").forEach((x) => x.classList.remove("is-active"));
+    b.classList.add("is-active");
+  }));
+  $("#cTarget").addEventListener("input", () => {
+    $$(".preset").forEach((b) => b.classList.toggle("is-active", b.dataset.t === $("#cTarget").value));
+  });
+  $("#calcBtn").addEventListener("click", runCalc);
+  ["cAttended", "cTotal", "cRemaining", "cTarget"].forEach((id) =>
+    $("#" + id).addEventListener("keydown", (e) => { if (e.key === "Enter") runCalc(); }));
+
+  function numv(id) { const v = parseInt($("#" + id).value, 10); return Number.isFinite(v) ? v : null; }
+
+  function runCalc() {
+    const out = $("#calcResult");
+    const a = numv("cAttended"), t = numv("cTotal"), r = numv("cRemaining"), tg = numv("cTarget");
+    const fail = (m) => { out.innerHTML = '<div class="err">' + m + "</div>"; };
+
+    if (a === null || t === null) return fail("Enter both attended and total classes.");
+    if (t <= 0) return fail("Total classes must be greater than 0.");
+    if (a < 0 || t < 0) return fail("Numbers can't be negative.");
+    if (a > t) return fail("Attended can't exceed total held.");
+    if (tg === null || tg <= 0 || tg > 100) return fail("Target must be between 1 and 100.");
+    if (r !== null && r < 0) return fail("Classes left can't be negative.");
+
+    const s = computeStats(a, t, tg);
+    let html = '<div class="res-block">';
+
+    if (r !== null && r > 0) {
+      const ft = t + r;
+      const mustAttend = Math.max(0, Math.ceil((tg / 100) * ft - a - 1e-9));
+      const canMiss = r - mustAttend;
+      if (canMiss < 0) {
+        const best = ((a + r) / ft) * 100;
+        html += banner("bad", "🚫", "Target out of reach this sem.", "Even attending all " + r + " left, you'd top out at " + best.toFixed(1) + "%.");
+        html += headline(r, "classes left — attend them all", "Then talk to your dept about condonation.");
+      } else {
+        const fin = ((a + mustAttend) / ft) * 100;
+        html += banner(canMiss > 0 ? "ok" : "warn", canMiss > 0 ? "✅" : "⚠️",
+          canMiss > 0 ? "You've got room." : "Zero room to spare.",
+          canMiss > 0 ? "Plan it out and stay at/above " + tg + "%." : "Attend every remaining class.");
+        html += headline(canMiss, canMiss === 1 ? "class you can still miss" : "classes you can still miss", "out of " + r + " left this semester.");
+        html += '<ul class="calc-tips">' +
+          tipLi("📌", "Attend at least <b>" + mustAttend + "</b> of the " + r + " remaining.") +
+          tipLi("🎯", "Stick to it and finish around <b>" + fin.toFixed(1) + "%</b>.") +
+          tipLi("📅", "Spread your misses out — don't burn them in one week.") + "</ul>";
+      }
+    } else {
+      html += currentLine(s.pct, tg);
+      if (s.meets) {
+        html += banner(s.canMiss > 0 ? "ok" : "warn", s.canMiss > 0 ? "✅" : "⚠️",
+          s.canMiss > 0 ? "You're safe." : "On the edge.",
+          "You currently meet " + tg + "%.");
+        html += headline(s.canMiss, s.canMiss === 1 ? "class you can miss now" : "classes you can miss now",
+          s.canMiss > 0 ? "Skip more in a row and you drop below " + tg + "%." : "Attend the next one to build a buffer.");
+      } else {
+        html += banner("bad", "⚠️", "Below the line.", "You're under " + tg + "%.");
+        html += headline(s.mustAttend, s.mustAttend === 1 ? "class to attend (no misses)" : "classes to attend in a row",
+          "Attend that many straight to reach " + tg + "%.");
+      }
+    }
+    html += "</div>";
+    out.innerHTML = html;
+    if (out.scrollIntoView) out.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function currentLine(pct, tg) {
+    const cls = pct >= tg ? "ok" : "bad";
+    return '<div class="banner ' + cls + '"><span class="emoji">📊</span><div><div class="bt">' +
+      pct.toFixed(2) + '% right now</div><div class="bs">Target: ' + tg + "%</div></div></div>";
+  }
+  function banner(type, emoji, title, sub) {
+    return '<div class="banner ' + type + '"><span class="emoji">' + emoji + '</span><div><div class="bt">' +
+      title + '</div><div class="bs">' + sub + "</div></div></div>";
+  }
+  function headline(num, desc, sub) {
+    return '<div class="headline"><div class="num">' + num + '</div><div class="desc">' + desc + "</div>" +
+      (sub ? '<div class="desc" style="margin-top:8px">' + sub + "</div>" : "") + "</div>";
+  }
+  function tipLi(ic, txt) { return "<li><span>" + ic + "</span><span>" + txt + "</span></li>"; }
 
   /* ============================ Boot ============================ */
   renderDash();
