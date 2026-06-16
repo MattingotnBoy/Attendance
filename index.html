@@ -3,59 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1b3a6b" />
-  <title>The Attendance Machine · Christ University</title>
+  <meta name="theme-color" content="#111111" />
+  <title>Matthew's Attendance</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="app">
-    <header class="hero">
-      <div class="badge">CHRIST (Deemed to be University)</div>
-      <h1>The Attendance Machine</h1>
-      <p class="tag">Figure out exactly how many classes you can afford to bunk — and still stay safe.</p>
+    <header class="head">
+      <h1>Matthew's Attendance</h1>
+      <p class="sub">How many classes can I miss?</p>
     </header>
 
-    <section class="card" aria-labelledby="inputs-title">
-      <h2 id="inputs-title">Your numbers</h2>
-
+    <section class="card">
       <div class="field">
-        <label for="attended">Classes attended so far</label>
-        <input type="number" id="attended" min="0" step="1" inputmode="numeric" placeholder="e.g. 42" />
+        <label for="attended">Classes attended</label>
+        <input type="number" id="attended" min="0" step="1" inputmode="numeric" placeholder="0" />
       </div>
 
       <div class="field">
-        <label for="total">Total classes held so far</label>
-        <input type="number" id="total" min="0" step="1" inputmode="numeric" placeholder="e.g. 50" />
+        <label for="total">Total classes held</label>
+        <input type="number" id="total" min="0" step="1" inputmode="numeric" placeholder="0" />
       </div>
 
       <div class="field">
-        <label for="remaining">Classes still left this semester <span class="opt">(optional)</span></label>
-        <input type="number" id="remaining" min="0" step="1" inputmode="numeric" placeholder="e.g. 30" />
+        <label for="remaining">Classes left this semester <span class="opt">· optional</span></label>
+        <input type="number" id="remaining" min="0" step="1" inputmode="numeric" placeholder="0" />
       </div>
 
       <div class="field">
-        <label for="target">Attendance you must maintain</label>
+        <label for="target">Required attendance</label>
         <div class="target-row">
-          <input type="number" id="target" min="1" max="100" step="1" value="85" inputmode="numeric" />
+          <input type="number" id="target" min="1" max="100" step="1" value="75" inputmode="numeric" />
           <span class="pct">%</span>
           <div class="presets">
-            <button type="button" class="preset is-active" data-target="85">85%</button>
-            <button type="button" class="preset" data-target="75">75%</button>
-            <button type="button" class="preset" data-target="90">90%</button>
+            <button type="button" class="preset is-active" data-target="75">75</button>
+            <button type="button" class="preset" data-target="85">85</button>
+            <button type="button" class="preset" data-target="90">90</button>
           </div>
         </div>
-        <p class="hint">Christ University's default requirement is <strong>85%</strong>.</p>
+        <p class="hint">Christ University needs <strong>75%</strong> per subject.</p>
       </div>
 
       <button type="button" id="calc" class="calc-btn">Calculate</button>
     </section>
 
-    <section class="card result" id="result" hidden aria-live="polite">
-      <!-- Filled by JS -->
-    </section>
+    <section class="card result" id="result" hidden aria-live="polite"></section>
 
     <footer class="foot">
-      <p>Unofficial helper. Always confirm the real requirement with your department — some courses set their own bar.</p>
+      Unofficial. Some courses set a higher bar — always confirm with your department.
     </footer>
   </main>
 

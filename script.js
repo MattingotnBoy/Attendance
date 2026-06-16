@@ -242,7 +242,7 @@
 
   function tipsBlock(targetPct) {
     return (
-      '<h2 style="font-size:14px;color:var(--navy);margin:20px 0 10px">How to hold the line</h2>' +
+      '<p class="res-h">How to hold the line</p>' +
       '<ul class="tips">' +
       tip("🧮", "Recalculate every couple of weeks — one missed lab or extra class shifts the math.") +
       tip("🤧", "Keep a buffer for sick days and emergencies instead of bunking to the exact limit.") +
