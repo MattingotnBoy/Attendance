@@ -41,6 +41,23 @@ python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
+## Deploy on Vercel
+
+It's a static site — no build step, no framework.
+
+- **Dashboard:** Import the repo → Framework Preset **Other** → leave Build &
+  Output settings empty → Deploy.
+- **CLI:**
+  ```bash
+  npm i -g vercel
+  vercel        # preview
+  vercel --prod # production
+  ```
+
+`vercel.json` is included (clean URLs + basic security headers). No build
+command or output directory is needed — Vercel serves `index.html` from the
+root automatically.
+
 ## The math
 
 For a target fraction `p`, attended `a`, total held `t`, classes left `r`:
